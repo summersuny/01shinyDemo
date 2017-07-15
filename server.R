@@ -102,11 +102,15 @@ observe({
                  )
   #add polyline for routes
   
-  proxy <- leafletProxy("map", data = df_route()) %>%
-  clearShapes() 
+  proxy <- leafletProxy("map", data = df_route()) 
+  
     
   if (input$routes) {
-    pointlist <- df_route(list(~Start.Station.Longitude,~Start.Station.Latitude),list(~End.Station.Longitude,~End.Station.Latitude))
+    route_tbl <- df_route()
+    pointlist <- route_tbllist list(list(~Start.Station.Longitude,~Start.Station.Latitude),
+                                    list(~End.Station.Longitude,~End.Station.Latitude)
+                                    )
+    
     polyline = L.Polyline(pointlist, polylineOptions)
     polylineOptions = c(
       color='ffa500',
@@ -130,17 +134,6 @@ observe({
   #                highlightOptions = NULL
   #  )
 })  
-
-
-
-map.addLayer(polyline)
-  
-  if (input$legend) {
-    pal <- colorpal()
-    proxy %>% addLegend(position = "bottomright",
-                        pal = pal, values = ~mag
-    )
-  }
 
 
 }
