@@ -45,5 +45,4 @@ df <- df%>% separate(Start.Time, into=c('start.date','start.ts'),sep='\\s') %>%
 df$start.date=as.Date(df$start.date)
 df$stop.date=as.Date(df$stop.date)
 df <- df %>% mutate(weekday=ifelse(weekdays(start.date) %in% c("Sarturday","Sunday"),'Weekends','Weekday'))
-
 save(df,file="~/Desktop/SHINY/data.Rda")
