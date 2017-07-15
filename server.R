@@ -32,6 +32,7 @@ library(lattice)
 library(dplyr)
 
 temp <- distinct(select(df,Start.Station.ID,Start.Total.Docks,Start.Station.Latitude,Start.Station.Longitude))
+temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,End.Station.Longitude))
 groupColors <- colorRampPalette(c("red", "#ffa500","green"))
 df$hours <- as.numeric(df$hr)
 
@@ -52,7 +53,7 @@ df$hours <- as.numeric(df$hr)
 
 
   df_map <- reactive({
-    
+    #aggregated data for stations
     df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
                    hours>=input$hrfrom  & hours<=input$hrto)
     nstart <- df2 %>%  group_by(Start.Station.ID) %>% summarise(nstart=n())
@@ -65,12 +66,31 @@ df$hours <- as.numeric(df$hr)
       mutate(rank=rank(abs_change_perc))
     return(dfmap)
   })
+  
+  
+df_route <- reactive({
+  df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
+                  hours>=input$hrfrom  & hours<=input$hrto)
+  #aggregated data for routes
+  nroute <- df2%>%  
+    group_by(Start.Station.ID, End.Station.ID) %>% 
+    summarise(nroute=n()) %>% 
+    arrange(desc(nroute)) 
+  #join lat,lng for start and end stations
+  nroute$route_id <- rownames(nroute)
+  routes <- left_join(nroute,temp,by = c("Start.Station.ID"="Start.Station.ID")) 
+  routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
+  
+  #take top 30% popular routes
+  top_route=head(routes2,n=dim(nroute)[1]*0.3)
+  return(top_route)
+  })  
 
 observe({  
+  #circles for staions
   leafletProxy("map", data = df_map()) %>%
     clearShapes() %>%
     addCircles(~Start.Station.Longitude, ~Start.Station.Latitude,
-               #radius=radius,
                #layerId=~withcircle,
                stroke=FALSE, fillOpacity=~(nstart/75+nend/75), color=~groupColors(rank),
                radius=70,
@@ -80,8 +100,49 @@ observe({
                               '4 year graduation rate: ', 'LINE4', '<br/>',
                               'median earnings: ', 'LINE5', '<br/>') 
                  )
-
+  #add polyline for routes
+  
+  proxy <- leafletProxy("map", data = df_route()) %>%
+  clearShapes() 
+    
+  if (input$routes) {
+    pointlist <- df_route(list(~Start.Station.Longitude,~Start.Station.Latitude),list(~End.Station.Longitude,~End.Station.Latitude))
+    polyline = L.Polyline(pointlist, polylineOptions)
+    polylineOptions = c(
+      color='ffa500',
+      weight=5,
+      opacity=0.5
+      )
+    
+    proxy %>% addLayer(polyline,polylineOptions)
+  } 
+  # else {
+  #   proxy %>% removeShape(layerId = LETTERS[1:6])
+  # }
+  
+  
+  
+  # addPolylines(~Start.Station.Longitude, ~Start.Station.Latitude,
+  #                color = "ffa500", weight = 5, opacity = 0.5,
+  #                fill = FALSE, fillColor = color, fillOpacity = 0.2, dashArray = NULL,
+  #                smoothFactor = 1, noClip = FALSE, popup = NULL, popupOptions = NULL,
+  #                label = NULL, labelOptions = NULL, options = pathOptions(),
+  #                highlightOptions = NULL
+  #  )
 })  
+
+
+
+map.addLayer(polyline)
+  
+  if (input$legend) {
+    pal <- colorpal()
+    proxy %>% addLegend(position = "bottomright",
+                        pal = pal, values = ~mag
+    )
+  }
+
+
 }
 
 

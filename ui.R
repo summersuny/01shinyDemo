@@ -28,9 +28,6 @@ vars <- c(
 )
 
 
-
-
-
 navbarPage("Summer's Shiny", id="nav", 
                    tabPanel("Interactive map",
                             div(class="outer",
@@ -58,6 +55,7 @@ navbarPage("Summer's Shiny", id="nav",
                                   numericInput("threshold", "Selectivity threshold (admit rate less than)", 8),
                                   numericInput("hrfrom", "Hour Range From", 8),
                                   numericInput("hrto", "Hour Range To", 10),
+                                  checkboxInput("routes", "Show Most Popular Routes", value = FALSE),
                                   
                                   dateRangeInput("dates", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31'),
                                   div(style = "margin: 0 auto;text-align: center;")
