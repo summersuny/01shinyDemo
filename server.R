@@ -30,7 +30,48 @@ library(RColorBrewer)
 library(scales)
 library(lattice)
 library(dplyr)
+library(sp)
+library(maptools)
 
+points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) {
+  
+  # Convert to SpatialPointsDataFrame
+  coordinates(data) <- c(long, lat)
+  
+  # If there is a sort field...
+  if (!is.null(sort_field)) {
+    if (!is.null(id_field)) {
+      data <- data[order(data[[id_field]], data[[sort_field]]), ]
+    } else {
+      data <- data[order(data[[sort_field]]), ]
+    }
+  }
+  
+  # If there is only one path...
+  if (is.null(id_field)) {
+    
+    lines <- SpatialLines(list(Lines(list(Line(data)), "id")))
+    
+    return(lines)
+    
+    # Now, if we have multiple lines...
+  } else if (!is.null(id_field)) {  
+    
+    # Split into a list by ID field
+    paths <- sp::split(data, data[[id_field]])
+    
+    sp_lines <- SpatialLines(list(Lines(list(Line(paths[[1]])), "line1")))
+    
+    # I like for loops, what can I say...
+    for (p in 2:length(paths)) {
+      id <- paste0("line", as.character(p))
+      l <- SpatialLines(list(Lines(list(Line(paths[[p]])), id)))
+      sp_lines <- spRbind(sp_lines, l)
+    }
+    
+    return(sp_lines)
+  }
+}
 temp <- distinct(select(df,Start.Station.ID,Start.Total.Docks,Start.Station.Latitude,Start.Station.Longitude))
 temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,End.Station.Longitude))
 groupColors <- colorRampPalette(c("red", "#ffa500","green"))
@@ -82,8 +123,15 @@ df_route <- reactive({
   routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
   
   #take top 30% popular routes
-  top_route=head(routes2,n=dim(nroute)[1]*0.3)
-  return(top_route)
+  top_route=head(routes2,n=dim(nroute)[1]*0.003)
+  z <- gather(top_route, measure, val, -route_id) %>% group_by(route_id) %>%
+    do(data.frame(   lat=c(.[["val"]][.[["measure"]]=="Start.Station.Latitude"],
+                           .[["val"]][.[["measure"]]=="End.Station.Latitude"]),
+                     long = c(.[["val"]][.[["measure"]]=="Start.Station.Longitude"],
+                            .[["val"]][.[["measure"]]=="End.Station.Longitude"])))
+  z <- as.data.frame(z)
+  y <- points_to_line(z, "long", "lat", "route_id") 
+  return(y)
   })  
 
 observe({  
@@ -99,40 +147,11 @@ observe({
                               'undergrads: ', 'LINE3', '<br/>',
                               '4 year graduation rate: ', 'LINE4', '<br/>',
                               'median earnings: ', 'LINE5', '<br/>') 
-                 )
+                 ) %>% 
+    addPolylines(data = df_route(),color="#ffa500",weight =2, opacity = 0.3)
   #add polyline for routes
   
-  proxy <- leafletProxy("map", data = df_route()) 
   
-    
-  if (input$routes) {
-    route_tbl <- df_route()
-    pointlist <- route_tbllist list(list(~Start.Station.Longitude,~Start.Station.Latitude),
-                                    list(~End.Station.Longitude,~End.Station.Latitude)
-                                    )
-    
-    polyline = L.Polyline(pointlist, polylineOptions)
-    polylineOptions = c(
-      color='ffa500',
-      weight=5,
-      opacity=0.5
-      )
-    
-    proxy %>% addLayer(polyline,polylineOptions)
-  } 
-  # else {
-  #   proxy %>% removeShape(layerId = LETTERS[1:6])
-  # }
-  
-  
-  
-  # addPolylines(~Start.Station.Longitude, ~Start.Station.Latitude,
-  #                color = "ffa500", weight = 5, opacity = 0.5,
-  #                fill = FALSE, fillColor = color, fillOpacity = 0.2, dashArray = NULL,
-  #                smoothFactor = 1, noClip = FALSE, popup = NULL, popupOptions = NULL,
-  #                label = NULL, labelOptions = NULL, options = pathOptions(),
-  #                highlightOptions = NULL
-  #  )
 })  
 
 

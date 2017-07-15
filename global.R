@@ -1,5 +1,5 @@
 library(leaflet)
-#install.packages("zipcode")
+#install.packages("maptools")
 #install.packages("ggthemes")
 library(ggthemes)
 library(tidycensus)
