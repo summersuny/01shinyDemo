@@ -61,7 +61,8 @@ df$hours <- as.numeric(df$hr)
     
     dfmap <- left_join(df_station,temp,by = c("Start.Station.ID"="Start.Station.ID")) %>%
       mutate(abs_change_perc=round(100*(nend-nstart)/nstart,1)) %>%
-      filter(!is.na(Start.Station.Latitude)) %>% mutate(rank=rank(abs_change_perc))
+      filter(!is.na(Start.Station.Latitude)) %>% 
+      mutate(rank=rank(abs_change_perc))
     return(dfmap)
   })
 
@@ -71,7 +72,14 @@ observe({
     addCircles(~Start.Station.Longitude, ~Start.Station.Latitude,
                #radius=radius,
                #layerId=~withcircle,
-               stroke=TRUE, fillOpacity=0.8, color=~groupColors(rank))
+               stroke=TRUE, fillOpacity=~(nstart/100+nend/100), color=~groupColors(rank),
+               radius=40,
+               popup =~paste('<b><font color="Red">', 'LINE1', '</font></b><br/>',
+                              'acceptance rate: ', 'LINE2', '<br/>',
+                              'undergrads: ', 'LINE3', '<br/>',
+                              '4 year graduation rate: ', 'LINE4', '<br/>',
+                              'median earnings: ', 'LINE5', '<br/>') 
+                 )
 
 })  
 }
