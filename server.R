@@ -44,20 +44,11 @@ groupColors <- colorRampPalette(c("red", "#ffa500","green"))
   #map <- createLeafletMap(session, "map")
     output$map <- renderLeaflet({
       leaflet() %>%
-        addTiles(
-          urlTemplate = "//{s}.tiles.mapbox.com/v3/jcheng.map-5ebohr46/{z}/{x}/{y}.png",
-          attribution = 'Maps by <a href="http://www.mapbox.com/">Mapbox</a>'
-        ) %>%
-        setView(lng = -93.85, lat = 37.45, zoom = 4)
+        addTiles('http://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', 
+        attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>') %>%
+        setView(lng = -73.960, lat = 40.753, zoom = 12)
     })
-  # output$map <- renderLeaflet({ 
-  #   
-  #   leaflet() %>% addTiles(urlTemplate ='//{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png',
-  #   attribution='Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  #   ) %>%
-  #     setView(lng=40.753, lat=-73.960,
-  #             zoom = 12)
-  # })    
+    
       
   # df_map <- reactive({
   #   df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2]
