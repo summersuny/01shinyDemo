@@ -96,7 +96,7 @@ df$hours <- as.numeric(df$hr)
   df_map <- reactive({
     #aggregated data for stations
     df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
-                   hours>=input$hrfrom  & hours<=input$hrto)
+                   hours>=input$hrs[1]  & hours<=input$hrs[2])
     nstart <- df2 %>%  group_by(Start.Station.ID) %>% summarise(nstart=n())
     nend <- df2 %>%  group_by(End.Station.ID) %>% summarise(nend=n())
     df_station <- full_join(nstart,nend,by=c("Start.Station.ID"="End.Station.ID"))
@@ -111,8 +111,9 @@ df$hours <- as.numeric(df$hr)
   
 df_route <- reactive({
   df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
-                  hours>=input$hrfrom  & hours<=input$hrto)
+                  hours>=input$hrs[1]  & hours<=input$hrs[2])
   #aggregated data for routes
+  if(input$routes==TRUE){
   nroute <- df2%>%  
     group_by(Start.Station.ID, End.Station.ID) %>% 
     summarise(nroute=n()) %>% 
@@ -122,8 +123,8 @@ df_route <- reactive({
   routes <- left_join(nroute,temp,by = c("Start.Station.ID"="Start.Station.ID")) 
   routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
   
-  #take top 30% popular routes
-  top_route=head(routes2,n=dim(nroute)[1]*0.003)
+  #take top 0.5% popular routes
+  top_route=head(routes2,n=dim(nroute)[1]*0.005)
   z <- gather(top_route, measure, val, -route_id) %>% group_by(route_id) %>%
     do(data.frame(   lat=c(.[["val"]][.[["measure"]]=="Start.Station.Latitude"],
                            .[["val"]][.[["measure"]]=="End.Station.Latitude"]),
@@ -132,6 +133,7 @@ df_route <- reactive({
   z <- as.data.frame(z)
   y <- points_to_line(z, "long", "lat", "route_id") 
   return(y)
+  } 
   })  
 
 observe({  
@@ -147,9 +149,15 @@ observe({
                               'undergrads: ', 'LINE3', '<br/>',
                               '4 year graduation rate: ', 'LINE4', '<br/>',
                               'median earnings: ', 'LINE5', '<br/>') 
-                 ) %>% 
-    addPolylines(data = df_route(),color="#ffa500",weight =2, opacity = 0.3)
-  #add polyline for routes
+                 ) 
+  
+  
+    if (input$routes==TRUE) {
+      leafletProxy("map", data = df_map()) %>% 
+      addPolylines(data = df_route(),color="#ffa500",weight =2, opacity = 0.3)
+      #add polyline for routes
+    } 
+    
   
   
 })  
