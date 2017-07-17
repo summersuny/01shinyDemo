@@ -241,6 +241,7 @@ function(input, output, session) {
     return(df_hr)
   })
   
+  
   observe({
     output$roseplot <- renderPlot({
       #if (nrow(zipsInBounds()) == 0)
@@ -267,6 +268,12 @@ function(input, output, session) {
               panel.border = element_blank(),
               panel.background = element_blank()) 
       return(p2)
+    })
+    
+    #table data
+    output$table <- DT::renderDataTable({
+      action <- DT::dataTableAjax(session, bar())
+      DT::datatable(bar(), options = list(ajax = list(url = action)), escape = FALSE)
     })
     
     

@@ -80,9 +80,13 @@ navbarPage("Summer's Shiny", id="nav",
                           includeScript("gomap.js")
                         ),
                         
-                        fluidRow(12,
-                          plotOutput("barplot", height = 300, width = "90%"),
-                          htmlOutput("view",height = 300, width = "90%")
+                        fluidRow(
+                          column(6,plotOutput("barplot", height = 400, width = "80%")),
+                          column(6,DT::dataTableOutput("table", height = 100, width = "40%"))
+                        ),
+                        
+                        fluidRow(
+                                 htmlOutput("view",height = 400, width = "90%")
                         ),
                         
                         
@@ -111,23 +115,6 @@ navbarPage("Summer's Shiny", id="nav",
                         
                     )
                     
-                      # headerPanel("Example 1: scatter chart"),
-                      # sidebarPanel(
-                      #   'Menue Name',
-                      #   selectInput("dataset", "Choose a dataset:", 
-                      #               choices = c("rock", "pressure", "cars"))
-                      #   ),
-                      # 
-                      # mainPanel(
-                      #   fluidRow(
-                      #     column(5,plotOutput("barplot", height = 300,width = 500)
-                      #     ),
-                      #     column(7,
-                      #       htmlOutput("view")
-                      #     )
-                      #   )
-                      # )
-                    #DT::dataTableOutput("ziptable")
            )
            
            #conditionalPanel("false", icon("crosshair"))
