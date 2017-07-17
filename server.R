@@ -141,7 +141,21 @@ function(input, output, session) {
   y <- points_to_line(z, "long", "lat", "route_id") 
   return(y)
   } 
-  })  
+  })
+  
+  #side absolut panel charts
+  df_hr <- df %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
+  #ggplot(df_hr,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity")
+  df_hr2 <- df_hr %>% filter(weekday=='Weekday')
+   
+  output$roseplot <- renderPlot({
+    #if (nrow(zipsInBounds()) == 0)
+     # return(NULL)
+    plot <- ggplot(df_hr2,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=ntrip),stat = "Identity") +
+      coord_polar() +scale_colour_brewer()
+   return(plot)  
+  })
+  
 
   observe({  
   #circles for staions
@@ -177,8 +191,33 @@ function(input, output, session) {
            "cars" = cars)
   })
   
+  
+  ##GoogleVis
+  #medium speed,total hours,distance spent by groups of type & age & gender, per month
+  #distance and convert to miles, speed miles/hours. Duration in seconds.
+  #age interval
+  df_ck  <-  df %>% mutate(distance=(abs(End.Station.Latitude-Start.Station.Latitude) +abs(End.Station.Longitude-Start.Station.Longitude))*45.096676
+  ) %>% mutate(speed=distance*60*60/Trip.Duration, age=cut(Birth.Year, breaks=seq(1917,2017, by=5), right = TRUE, labels = seq(100,5,by=-5))) 
+
+  df_cust <- df_ck %>% 
+    group_by(User.Type,age,Gender,months(start.date)) %>% 
+    summarise(median_speed=median(speed),
+    median_sum_duration=median(sum(Trip.Duration/360)),
+    median_sum_distance=median(sum(distance)),
+    count=n())
+  
+  colnames(df_cust)[4]='month'
   output$view <- renderGvis({
-    gvisScatterChart(datasetInput(), options=list(width=400, height=450))
+    gvisBubbleChart(df_cust, idvar="age", 
+                              xvar="median_sum_distance", yvar="median_speed",
+                              colorvar="Gender", sizevar="count",
+                              options=list(
+                                vAxis= "{minValue: 0, maxValue: 8}",
+                                hAxis= "{logScale:true}",
+                                explorer="{actions:['dragToZoom', 'rightClickToReset']}",
+                                width=600, height=600
+                              )
+    )
   })
 
 }

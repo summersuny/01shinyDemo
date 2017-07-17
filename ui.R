@@ -63,10 +63,11 @@ navbarPage("Summer's Shiny", id="nav",
                                   div(style = "margin: 0 auto;text-align: center;")
                                          ),
                                 
-                                 tags$div(id="cite",
-                                          HTML('Contact <a href="http://www.richmajerus.com/" target="_blank" >Rich Majerus </a> (rich.majerus@gmail.com) with questions, comments or concerns.  This application was built from code developed by the <a href="https://github.com/rstudio/shiny-examples/tree/master/063-superzip-example" target="_blank" >RStudio Team</a>. Data Source: National Center for Education Statistics, Integrated Postsecondary Education Data System (IPEDS) 2012-2013.  Due to these data being self-reported by each institution, the quality of the data in this visualization is only as high as the quality of institutional reporting. This visualization presents IPEDS data “as is." '
-                                          )
-                                        )
+                                  plotOutput("roseplot", height = 200)
+                                  # tags$div(id="cite",
+                                  #         HTML('Contact <a href="http://www.richmajerus.com/" target="_blank" >Rich Majerus </a> (rich.majerus@gmail.com) with questions, comments or concerns.  This application was built from code developed by the <a href="https://github.com/rstudio/shiny-examples/tree/master/063-superzip-example" target="_blank" >RStudio Team</a>. Data Source: National Center for Education Statistics, Integrated Postsecondary Education Data System (IPEDS) 2012-2013.  Due to these data being self-reported by each institution, the quality of the data in this visualization is only as high as the quality of institutional reporting. This visualization presents IPEDS data “as is." '
+                                  #         )
+                                  #       )
                                   )
                    ),
            tabPanel("Rider Activities",
@@ -75,12 +76,16 @@ navbarPage("Summer's Shiny", id="nav",
                       sidebarPanel(
                         selectInput("dataset", "Choose a dataset:", 
                                     choices = c("rock", "pressure", "cars"))
-                      ),
+                        #,plotOutput("roseplot")
+                        ),
+                    
                       mainPanel(
+                        
                         htmlOutput("view")
+                        
                       )
                     #DT::dataTableOutput("ziptable")
-           ),
+           )
            
-           conditionalPanel("false", icon("crosshair"))
+           #conditionalPanel("false", icon("crosshair"))
 )
