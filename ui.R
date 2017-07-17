@@ -75,14 +75,19 @@ navbarPage("Summer's Shiny", id="nav",
                     
                       headerPanel("Example 1: scatter chart"),
                       sidebarPanel(
+                        'Menue Name',
                         selectInput("dataset", "Choose a dataset:", 
                                     choices = c("rock", "pressure", "cars"))
                         ),
                     
                       mainPanel(
-                        
-                        htmlOutput("view")
-                        
+                        fluidRow(
+                          column(5,plotOutput("barplot", height = 300,width = 300)
+                          ),
+                          column(7,
+                            htmlOutput("view")
+                          )
+                        )
                       )
                     #DT::dataTableOutput("ziptable")
            )

@@ -209,7 +209,7 @@ function(input, output, session) {
     )
   })
   
-  
+  #ggplot
   rose <- reactive({
     df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
                     hours>=input$hrs[1]  & hours<=input$hrs[2] )
@@ -245,6 +245,21 @@ function(input, output, session) {
               panel.background = element_blank()) 
       print(p)
     })
+    
+    output$barplot <- renderPlot({
+      #if (nrow(zipsInBounds()) == 0)
+      # return(NULL)
+      p2 <- ggplot(rose(),aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity") +
+        theme_bw() +
+        theme(axis.line = element_line(colour = "black"),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank()) 
+      print(p2)
+    })
+    
+    
   })
 
 }
