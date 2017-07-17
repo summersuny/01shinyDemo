@@ -232,8 +232,12 @@ function(input, output, session) {
   
   bar <- reactive({
     #barpot in rider's tab
-    #[placeholder] filter
-    df_hr <- df %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
+    df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
+                    hours>=input$hrs[1]  & hours<=input$hrs[2] )
+    if(!is.null(input$sex)) {
+      df2 <- filter(df2,Gender %in% input$sex)
+    }
+    df_hr <- df2 %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
     return(df_hr)
   })
   

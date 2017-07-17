@@ -72,23 +72,61 @@ navbarPage("Summer's Shiny", id="nav",
                                   )
                    ),
            tabPanel("Rider Activities",
-                    
-                      headerPanel("Example 1: scatter chart"),
-                      sidebarPanel(
-                        'Menue Name',
-                        selectInput("dataset", "Choose a dataset:", 
-                                    choices = c("rock", "pressure", "cars"))
+                    div(class="outer",
+                        
+                        tags$head(
+                          # Include our custom CSS
+                          includeCSS("styles.css"),
+                          includeScript("gomap.js")
                         ),
-                    
-                      mainPanel(
-                        fluidRow(
-                          column(5,plotOutput("barplot", height = 300,width = 500)
-                          ),
-                          column(7,
-                            htmlOutput("view")
-                          )
+                        
+                        fluidRow(12,
+                          plotOutput("barplot", height = 300, width = "90%"),
+                          htmlOutput("view",height = 300, width = "90%")
+                        ),
+                        
+                        
+                        absolutePanel(
+                          id = "controls", 
+                          #class = "modal-body", 
+                          fixed = TRUE, draggable = TRUE,
+                          top = 60, left = "auto", right = 20, bottom = "auto",
+                          width = 330, height = "auto",
+                          
+                          h2("Station Explorer"),
+                          
+                          selectInput("sex", "Gender", vars,multiple=TRUE),
+                          #selectInput("size", "Size", vars, selected = "nboth"),
+                          #numericInput("age", "Select age (admit rate less than)", 8),
+                          #numericInput("hrfrom", "Hour Range From", 8),
+                          #numericInput("hrto", "Hour Range To", 10),
+                          sliderInput("hrs", label = h3("Hour Range"), min = 0, 
+                                      max = 23, value = c(0, 23)),
+                          checkboxInput("routes", "Show Most Popular Routes", value = FALSE),
+                          
+                          dateRangeInput("dates", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31'),
+                          div(style = "margin: 0 auto;text-align: center;")
+                              
                         )
-                      )
+                        
+                    )
+                    
+                      # headerPanel("Example 1: scatter chart"),
+                      # sidebarPanel(
+                      #   'Menue Name',
+                      #   selectInput("dataset", "Choose a dataset:", 
+                      #               choices = c("rock", "pressure", "cars"))
+                      #   ),
+                      # 
+                      # mainPanel(
+                      #   fluidRow(
+                      #     column(5,plotOutput("barplot", height = 300,width = 500)
+                      #     ),
+                      #     column(7,
+                      #       htmlOutput("view")
+                      #     )
+                      #   )
+                      # )
                     #DT::dataTableOutput("ziptable")
            )
            
