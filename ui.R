@@ -82,7 +82,7 @@ navbarPage("Summer's Shiny", id="nav",
                     
                       mainPanel(
                         fluidRow(
-                          column(5,plotOutput("barplot", height = 300,width = 300)
+                          column(5,plotOutput("barplot", height = 300,width = 500)
                           ),
                           column(7,
                             htmlOutput("view")

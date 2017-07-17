@@ -227,8 +227,14 @@ function(input, output, session) {
     df_hr2 <- as.data.frame(rbind(df_hr2,tb) %>% 
                   group_by(hr,weekday) %>%
                   summarise(ntrip=sum(ntrip)))
-    View(df_hr2)
     return(df_hr2)
+  })
+  
+  bar <- reactive({
+    #barpot in rider's tab
+    #[placeholder] filter
+    df_hr <- df %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
+    return(df_hr)
   })
   
   observe({
@@ -249,14 +255,14 @@ function(input, output, session) {
     output$barplot <- renderPlot({
       #if (nrow(zipsInBounds()) == 0)
       # return(NULL)
-      p2 <- ggplot(rose(),aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity") +
+      p2 <- ggplot(bar(),aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity") +
         theme_bw() +
         theme(axis.line = element_line(colour = "black"),
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
               panel.border = element_blank(),
               panel.background = element_blank()) 
-      print(p2)
+      return(p2)
     })
     
     
