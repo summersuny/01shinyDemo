@@ -96,7 +96,11 @@ df$hours <- as.numeric(df$hr)
   df_map <- reactive({
     #aggregated data for stations
     df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
-                   hours>=input$hrs[1]  & hours<=input$hrs[2])
+                   hours>=input$hrs[1]  & hours<=input$hrs[2] )
+    if(!is.null(input$sex)) {
+      df2 <- filter(df2,Gender %in% input$sex)
+    }
+    
     nstart <- df2 %>%  group_by(Start.Station.ID) %>% summarise(nstart=n())
     nend <- df2 %>%  group_by(End.Station.ID) %>% summarise(nend=n())
     df_station <- full_join(nstart,nend,by=c("Start.Station.ID"="End.Station.ID"))
@@ -112,6 +116,9 @@ df$hours <- as.numeric(df$hr)
 df_route <- reactive({
   df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
                   hours>=input$hrs[1]  & hours<=input$hrs[2])
+  # if(!is.na(input$sex)){
+  #   df2 <- filter(df2,Gender %in% input$sex)
+  # }
   #aggregated data for routes
   if(input$routes==TRUE){
   nroute <- df2%>%  

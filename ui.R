@@ -22,9 +22,9 @@ library(shiny)
 ##########
 # Choices for drop-downs
 vars <- c(
-  "All Stations" = "nboth", 
-  "Origination" = "nstart",
-  "Destination" = "nend"
+  "Female" = "2", 
+  "Male" = "1",
+  "Unkown" = "0"
 )
 
 
@@ -50,9 +50,9 @@ navbarPage("Summer's Shiny", id="nav",
                                   
                                   h2("Station Explorer"),
                                   
-                                  selectInput("color", "Color", vars),
-                                  selectInput("size", "Size", vars, selected = "nboth"),
-                                  numericInput("threshold", "Selectivity threshold (admit rate less than)", 8),
+                                  selectInput("sex", "Gender", vars,multiple=TRUE),
+                                  #selectInput("size", "Size", vars, selected = "nboth"),
+                                  #numericInput("age", "Select age (admit rate less than)", 8),
                                   #numericInput("hrfrom", "Hour Range From", 8),
                                   #numericInput("hrto", "Hour Range To", 10),
                                   sliderInput("hrs", label = h3("Hour Range"), min = 0, 
