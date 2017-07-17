@@ -114,11 +114,11 @@ function(input, output, session) {
   
   
   df_route <- reactive({
-  df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
-                  hours>=input$hrs[1]  & hours<=input$hrs[2])
-  # if(!is.na(input$sex)){
-  #   df2 <- filter(df2,Gender %in% input$sex)
-  # }
+    df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
+                    hours>=input$hrs[1]  & hours<=input$hrs[2] )
+    if(!is.null(input$sex)) {
+      df2 <- filter(df2,Gender %in% input$sex)
+    }
   #aggregated data for routes
   if(input$routes==TRUE){
   nroute <- df2%>%  
@@ -141,22 +141,11 @@ function(input, output, session) {
   y <- points_to_line(z, "long", "lat", "route_id") 
   return(y)
   } 
-  })
-  
-  #side absolut panel charts
-  df_hr <- df %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
-  #ggplot(df_hr,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity")
-  df_hr2 <- df_hr %>% filter(weekday=='Weekday')
-   
-  output$roseplot <- renderPlot({
-    #if (nrow(zipsInBounds()) == 0)
-     # return(NULL)
-    plot <- ggplot(df_hr2,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=ntrip),stat = "Identity") +
-      coord_polar() +scale_colour_brewer()
-   return(plot)  
-  })
   
 
+  })
+  
+  
   observe({  
   #circles for staions
   leafletProxy("map", data = df_map()) %>%
@@ -218,6 +207,44 @@ function(input, output, session) {
                                 width=600, height=600
                               )
     )
+  })
+  
+  
+  rose <- reactive({
+    df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
+                    hours>=input$hrs[1]  & hours<=input$hrs[2] )
+    if(!is.null(input$sex)) {
+      df2 <- filter(df2,Gender %in% input$sex)
+    }
+    #side absolut panel charts
+    df_hr <- df2 %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
+    #ggplot(df_hr,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity")
+    df_hr2 <- df_hr %>% filter(weekday=='Weekday')
+    df_hr2=ungroup(df_hr2)
+    #add 1 trip to each hour to maitain rosemap, group has small bug
+    tb=data.frame(hr=c('00','01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23'),
+    weekday=c(rep('weekday',24)),ntrip=c(rep(1,24)))
+    df_hr2 <- as.data.frame(rbind(df_hr2,tb) %>% 
+                  group_by(hr,weekday) %>%
+                  summarise(ntrip=sum(ntrip)))
+    View(df_hr2)
+    return(df_hr2)
+  })
+  
+  observe({
+    output$roseplot <- renderPlot({
+      #if (nrow(zipsInBounds()) == 0)
+      # return(NULL)
+      p <- ggplot(rose(),aes(x=hr,y=ntrip)) +
+        geom_bar(aes(fill=ntrip),stat = "Identity") +coord_polar() +scale_colour_brewer() +
+        theme_bw() +
+        theme(axis.line = element_line(colour = "black"),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank()) 
+      print(p)
+    })
   })
 
 }
