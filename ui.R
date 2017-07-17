@@ -68,7 +68,19 @@ navbarPage("Summer's Shiny", id="nav",
                                           )
                                         )
                                   )
-                   )
-                   
-
+                   ),
+           tabPanel("Rider Activities",
+                    
+                      headerPanel("Example 1: scatter chart"),
+                      sidebarPanel(
+                        selectInput("dataset", "Choose a dataset:", 
+                                    choices = c("rock", "pressure", "cars"))
+                      ),
+                      mainPanel(
+                        htmlOutput("view")
+                      )
+                    #DT::dataTableOutput("ziptable")
+           ),
+           
+           conditionalPanel("false", icon("crosshair"))
 )

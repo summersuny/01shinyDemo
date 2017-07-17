@@ -77,7 +77,7 @@ temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,
 groupColors <- colorRampPalette(c("red", "#ffa500","green"))
 df$hours <- as.numeric(df$hr)
 
-  function(input, output, session) {
+function(input, output, session) {
   
   ## Interactive Map ###########################################
   
@@ -113,7 +113,7 @@ df$hours <- as.numeric(df$hr)
   })
   
   
-df_route <- reactive({
+  df_route <- reactive({
   df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
                   hours>=input$hrs[1]  & hours<=input$hrs[2])
   # if(!is.na(input$sex)){
@@ -143,7 +143,7 @@ df_route <- reactive({
   } 
   })  
 
-observe({  
+  observe({  
   #circles for staions
   leafletProxy("map", data = df_map()) %>%
     clearShapes() %>%
@@ -167,8 +167,19 @@ observe({
     
   
   
-})  
+  })  
 
+  ## Rider Activities##############################################
+  datasetInput <- reactive({
+    switch(input$dataset,
+           "rock" = rock,
+           "pressure" = pressure,
+           "cars" = cars)
+  })
+  
+  output$view <- renderGvis({
+    gvisScatterChart(datasetInput(), options=list(width=400, height=450))
+  })
 
 }
 
