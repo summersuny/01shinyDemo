@@ -13,6 +13,11 @@ vars2 <- c(
   "Unkown" = "0"
 )
 
+vars3 <- c(
+  "Manhattan Distance" = 2, 
+  "Euclidean" = 1
+)
+
 
 navbarPage("The NYC Citi Bike App", id="nav", 
                    tabPanel("Interactive map",
@@ -37,7 +42,7 @@ navbarPage("The NYC Citi Bike App", id="nav",
                                   h3("Station Explorer"),
                                   
                                   selectInput("sex", "Gender", vars,multiple=TRUE),
-                                  #selectInput("size", "Size", vars, selected = "nboth"),
+                                  
                                   #numericInput("age", "Select age (admit rate less than)", 8),
                                   #numericInput("hrfrom", "Hour Range From", 8),
                                   #numericInput("hrto", "Hour Range To", 10),
@@ -84,11 +89,11 @@ navbarPage("The NYC Citi Bike App", id="nav",
                           width = 330, height = "auto",
                           
                           h3("Station Explorer"),
-                          
+                          selectInput("distance", "Type of Distance", vars3, selected = c("distance","speed")),
                           selectInput("sex2", "Gender", vars2,multiple=TRUE),
                           sliderInput("hrs2", label = h3("Hour Range"), min = 0, 
                                       max = 23, value = c(0, 23)),
-                          checkboxInput("routes2", "Show Most Popular Routes", value = FALSE),
+                          
                           dateRangeInput("dates2", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31'),
                           div(style = "margin: 0 auto;text-align: center;")
                               

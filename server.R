@@ -7,6 +7,7 @@ library(lattice)
 library(dplyr)
 library(sp)
 library(maptools)
+library(scales)
 
 points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) {
   
@@ -84,8 +85,9 @@ function(input, output, session) {
     
     dfmap <- left_join(df_station,temp,by = c("Start.Station.ID"="Start.Station.ID")) %>%
       mutate(abs_change_perc=round(100*(nend-nstart)/nstart,1)) %>%
-      filter(!is.na(Start.Station.Latitude)) %>% 
+      filter(!is.na(Start.Station.Latitude)) %>% filter(abs_change_perc,!is.na(rank)) %>% 
       mutate(rank=rank(abs_change_perc)) 
+
     return(dfmap)
   })
   
@@ -107,8 +109,8 @@ function(input, output, session) {
   routes <- left_join(nroute,temp,by = c("Start.Station.ID"="Start.Station.ID")) 
   routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
   
-  #take top 0.8% popular routes
-  top_route=head(routes2,n=dim(nroute)[1]*0.008)
+  #take top 0.6% popular routes
+  top_route=head(routes2,n=dim(nroute)[1]*0.006)
   z <- gather(top_route, measure, val, -route_id) %>% group_by(route_id) %>%
     do(data.frame(   lat=c(.[["val"]][.[["measure"]]=="Start.Station.Latitude"],
                            .[["val"]][.[["measure"]]=="End.Station.Latitude"]),
@@ -150,12 +152,6 @@ function(input, output, session) {
   })  
 
   ## Rider Activities##############################################
-  datasetInput <- reactive({
-    switch(input$dataset,
-           "rock" = rock,
-           "pressure" = pressure,
-           "cars" = cars)
-  })
   
   df_gvis <- reactive({
   ##GoogleVis
@@ -170,18 +166,24 @@ function(input, output, session) {
   }
   
   df_ck  <-  df2 %>% mutate(distance=(abs(End.Station.Latitude-Start.Station.Latitude) +abs(End.Station.Longitude-Start.Station.Longitude))*45.096676
-  ) %>% mutate(speed=distance*60*60/Trip.Duration, age=cut(Birth.Year, breaks=seq(1917,2017, by=5), right = TRUE, labels = seq(100,5,by=-5))) 
+  ) %>% mutate(speed=distance*60*60/Trip.Duration, age=cut(Birth.Year, breaks=seq(1917,2017, by=5), right = TRUE, labels = seq(100,5,by=-5))) %>% 
+     mutate(distance_eucli=sqrt((End.Station.Latitude-Start.Station.Latitude)^2 +(End.Station.Longitude-Start.Station.Longitude)^2)*45.096676
+    ) %>% mutate(speed_eucli=distance_eucli*60*60/Trip.Duration) 
+    
 
+  ##manhattan distance aggregation table
   df_cust <- df_ck %>% 
     group_by(User.Type,age,Gender,months(start.date)) %>% 
-    summarise(median_speed=median(speed),
+    summarise(median_speed=median(df_ck[]),
     median_sum_duration=median(sum(Trip.Duration/360)),
-    avg_trip_distance=sum(distance)/n(), #avg_trip_distance changed
+    avg_trip_distance=sum(input$distance[1])/n(), #avg_trip_distance changed
     count=n())
+  
   df_cust$Gender <-  gsub("1", 'Male',df_cust$Gender) 
   df_cust$Gender <- gsub("2", 'Female',df_cust$Gender) 
   df_cust$Gender <- gsub("0", 'Unkown',df_cust$Gender)
-  colnames(df_cust)[4]='month'
+  colnames(df_cust1)[4]='month'
+  
   return(df_cust)
   })
   
@@ -274,8 +276,9 @@ function(input, output, session) {
       #if (nrow(zipsInBounds()) == 0)
       # return(NULL)
       p2 <- ggplot(bar(),aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity") +
-        theme_bw() +
-        theme(axis.line = element_line(colour = "black"),
+        theme_bw() + scale_y_continuous(labels = comma) +
+        theme(legend.title = element_blank(),
+              axis.line = element_line(colour = "black"),
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
               panel.border = element_blank(),
