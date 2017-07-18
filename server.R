@@ -52,6 +52,8 @@ temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,
 groupColors <- colorRampPalette(c("red", "#ffa500","green"))
 df$hours <- as.numeric(df$hr)
 
+
+
 function(input, output, session) {
   
   ## Interactive Map ###########################################
@@ -83,7 +85,7 @@ function(input, output, session) {
     dfmap <- left_join(df_station,temp,by = c("Start.Station.ID"="Start.Station.ID")) %>%
       mutate(abs_change_perc=round(100*(nend-nstart)/nstart,1)) %>%
       filter(!is.na(Start.Station.Latitude)) %>% 
-      mutate(rank=rank(abs_change_perc))
+      mutate(rank=rank(abs_change_perc)) 
     return(dfmap)
   })
   
@@ -105,8 +107,8 @@ function(input, output, session) {
   routes <- left_join(nroute,temp,by = c("Start.Station.ID"="Start.Station.ID")) 
   routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
   
-  #take top 0.5% popular routes
-  top_route=head(routes2,n=dim(nroute)[1]*0.01)
+  #take top 0.8% popular routes
+  top_route=head(routes2,n=dim(nroute)[1]*0.008)
   z <- gather(top_route, measure, val, -route_id) %>% group_by(route_id) %>%
     do(data.frame(   lat=c(.[["val"]][.[["measure"]]=="Start.Station.Latitude"],
                            .[["val"]][.[["measure"]]=="End.Station.Latitude"]),
@@ -122,17 +124,18 @@ function(input, output, session) {
   
   
   observe({  
+    pal <- colorNumeric(palette=colorRampPalette(c("red", "#ffa500","green"))(3000),domain = df_map()$rank)
   #circles for staions
   leafletProxy("map", data = df_map()) %>%
     clearShapes() %>%
     addCircles(~Start.Station.Longitude, ~Start.Station.Latitude,
                #layerId=~withcircle,
-               stroke=FALSE, fillOpacity=~(nstart/75+nend/75), color=~groupColors(rank),
+               stroke=FALSE, fillOpacity=~(nstart/75+nend/75), color=~pal(rank),
                radius=70, 
                popup =~paste('<b><font color="Red">', 'Station ID: ', Start.Station.ID, '</font></b><br/>',
                               'Number of Trip Starts Here: ', nstart, '<br/>',
                               'Number of Trip End Here: ', nend, '<br/>',
-                              'Rate of Bike Changes: ', abs_change_perc, '<br/>') 
+                              'Rate of Bike Changes: ', abs_change_perc,' %', '<br/>') 
                  ) 
   
   
