@@ -192,7 +192,7 @@ function(input, output, session) {
     group_by(User.Type,age,Gender,months(start.date)) %>% 
     summarise(median_speed=median(speed),
     median_sum_duration=median(sum(Trip.Duration/360)),
-    median_sum_distance=median(sum(distance)),
+    median_sum_distance=sum(distance)/n(), #avg_trip_distance changed
     count=n())
   
   colnames(df_cust)[4]='month'
@@ -201,10 +201,26 @@ function(input, output, session) {
                               xvar="median_sum_distance", yvar="median_speed",
                               colorvar="Gender", sizevar="count",
                               options=list(
-                                vAxis= "{minValue: 0, maxValue: 8}",
-                                hAxis= "{logScale:true}",
-                                explorer="{actions:['dragToZoom', 'rightClickToReset']}",
-                                width=600, height=600
+                                vAxis= "{minValue: 0, maxValue: 6,title: 'Speed (MPH)',
+                                viewWindowMode:'explicit',
+                                viewWindow: {
+                                max:6.5,
+                                min:4.5}}",
+                                hAxis= "{
+                                maxValue:3,title:'Average Miles Per Trip)' ,
+                                viewWindowMode:'explicit',
+                                viewWindow: {
+                                max:2,
+                                min:0}}",
+                                explorer="{actions:['dragToZoom', 'rightClickToReset']}"
+                                ,width=800 
+                                ,height=400
+                                ,chartArea="{left:80,top:30,width:'100%',height:'75%'}"
+                                ,legend="top"
+                                ,title="Rider's Performance by Gender and Age"
+                                ,sizeAxis = '{minValue: 0,  maxSize: 20}'
+                                
+                                
                               )
     )
   })
@@ -232,11 +248,12 @@ function(input, output, session) {
   
   bar <- reactive({
     #barpot in rider's tab
-    df2 <- filter(df, start.date >= input$dates[1] & stop.date <= input$dates[2] &
-                    hours>=input$hrs[1]  & hours<=input$hrs[2] )
+    df2 <- filter(df, start.date >= input$dates2[1] & stop.date <= input$dates2[2] &
+                    hours>=input$hrs2[1]  & hours<=input$hrs2[2] )
     if(!is.null(input$sex)) {
       df2 <- filter(df2,Gender %in% input$sex)
     }
+    
     df_hr <- df2 %>% group_by(hr,weekday) %>% summarise(ntrip=n()) 
     return(df_hr)
   })
@@ -270,11 +287,11 @@ function(input, output, session) {
       return(p2)
     })
     
-    #table data
-    output$table <- DT::renderDataTable({
-      action <- DT::dataTableAjax(session, bar())
-      DT::datatable(bar(), options = list(ajax = list(url = action)), escape = FALSE)
-    })
+    # #table data
+    # output$table <- DT::renderDataTable({
+    #   action <- DT::dataTableAjax(session, bar())
+    #   DT::datatable(bar(), options = list(ajax = list(url = action)), escape = FALSE,height = 200)
+    # })
     
     
   })

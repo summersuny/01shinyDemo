@@ -79,16 +79,16 @@ navbarPage("Summer's Shiny", id="nav",
                           includeCSS("styles.css"),
                           includeScript("gomap.js")
                         ),
+                      
                         
                         fluidRow(
-                          column(6,plotOutput("barplot", height = 400, width = "80%")),
-                          column(6,DT::dataTableOutput("table", height = 100, width = "40%"))
+                          htmlOutput("view",height = 400, width = 800)
                         ),
                         
                         fluidRow(
-                                 htmlOutput("view",height = 400, width = "90%")
+                          column(12,plotOutput("barplot", height = 200, width = 800))
+                          #column(6,DT::dataTableOutput("table"))#, height = 100, width = "40%"))
                         ),
-                        
                         
                         absolutePanel(
                           id = "controls", 
@@ -99,16 +99,11 @@ navbarPage("Summer's Shiny", id="nav",
                           
                           h2("Station Explorer"),
                           
-                          selectInput("sex", "Gender", vars,multiple=TRUE),
-                          #selectInput("size", "Size", vars, selected = "nboth"),
-                          #numericInput("age", "Select age (admit rate less than)", 8),
-                          #numericInput("hrfrom", "Hour Range From", 8),
-                          #numericInput("hrto", "Hour Range To", 10),
-                          sliderInput("hrs", label = h3("Hour Range"), min = 0, 
+                          selectInput("sex2", "Gender", vars,multiple=TRUE),
+                          sliderInput("hrs2", label = h3("Hour Range"), min = 0, 
                                       max = 23, value = c(0, 23)),
-                          checkboxInput("routes", "Show Most Popular Routes", value = FALSE),
-                          
-                          dateRangeInput("dates", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31'),
+                          checkboxInput("routes2", "Show Most Popular Routes", value = FALSE),
+                          dateRangeInput("dates2", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31'),
                           div(style = "margin: 0 auto;text-align: center;")
                               
                         )
