@@ -14,8 +14,8 @@ vars2 <- c(
 )
 
 vars3 <- c(
-  "Manhattan Distance" = 2, 
-  "Euclidean" = 1
+  "Manhattan Distance" = "distance_manhn", 
+  "Euclidean" = "distance_eucli"
 )
 
 
@@ -89,7 +89,7 @@ navbarPage("The NYC Citi Bike App", id="nav",
                           width = 330, height = "auto",
                           
                           h3("Station Explorer"),
-                          selectInput("distance", "Type of Distance", vars3, selected = c("distance","speed")),
+                          selectInput("distance", "Type of Distance", vars3, selected = "distance"),
                           selectInput("sex2", "Gender", vars2,multiple=TRUE),
                           sliderInput("hrs2", label = h3("Hour Range"), min = 0, 
                                       max = 23, value = c(0, 23)),

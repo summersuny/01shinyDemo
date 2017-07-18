@@ -164,25 +164,27 @@ function(input, output, session) {
   if(!is.null(input$sex2)) {
     df2 <- filter(df2,Gender %in% input$sex2)
   }
-  
-  df_ck  <-  df2 %>% mutate(distance=(abs(End.Station.Latitude-Start.Station.Latitude) +abs(End.Station.Longitude-Start.Station.Longitude))*45.096676
-  ) %>% mutate(speed=distance*60*60/Trip.Duration, age=cut(Birth.Year, breaks=seq(1917,2017, by=5), right = TRUE, labels = seq(100,5,by=-5))) %>% 
+  print(names(df2))
+  df_ck  <-  df2 %>% mutate(distance_manhn=(abs(End.Station.Latitude-Start.Station.Latitude) + abs(End.Station.Longitude-Start.Station.Longitude))*45.096676
+  ) %>%
+    mutate(age=cut(Birth.Year, breaks=seq(1917,2017, by=5), right = TRUE, labels = seq(100,5,by=-5))) %>% 
      mutate(distance_eucli=sqrt((End.Station.Latitude-Start.Station.Latitude)^2 +(End.Station.Longitude-Start.Station.Longitude)^2)*45.096676
-    ) %>% mutate(speed_eucli=distance_eucli*60*60/Trip.Duration) 
+    ) %>% mutate_(distance=input$distance) %>% 
+    mutate(speed=distance*60*60/Trip.Duration) 
     
 
   ##manhattan distance aggregation table
   df_cust <- df_ck %>% 
-    group_by(User.Type,age,Gender,months(start.date)) %>% 
-    summarise(median_speed=median(df_ck[]),
-    median_sum_duration=median(sum(Trip.Duration/360)),
-    avg_trip_distance=sum(input$distance[1])/n(), #avg_trip_distance changed
-    count=n())
+    group_by(User.Type, age, Gender, months(start.date)) %>% 
+    summarise(median_speed=median(speed),
+              median_sum_duration=median(sum(Trip.Duration/360)),
+              avg_trip_distance=sum(distance)/n(), 
+              count=n())
   
   df_cust$Gender <-  gsub("1", 'Male',df_cust$Gender) 
   df_cust$Gender <- gsub("2", 'Female',df_cust$Gender) 
   df_cust$Gender <- gsub("0", 'Unkown',df_cust$Gender)
-  colnames(df_cust1)[4]='month'
+  colnames(df_cust)[4]='month'
   
   return(df_cust)
   })
