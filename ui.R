@@ -27,6 +27,12 @@ vars <- c(
   "Unkown" = "0"
 )
 
+vars2 <- c(
+  "Female" = "2", 
+  "Male" = "1",
+  "Unkown" = "0"
+)
+
 
 navbarPage("Summer's Shiny", id="nav", 
                    tabPanel("Interactive map",
@@ -99,7 +105,7 @@ navbarPage("Summer's Shiny", id="nav",
                           
                           h2("Station Explorer"),
                           
-                          selectInput("sex2", "Gender", vars,multiple=TRUE),
+                          selectInput("sex2", "Gender", vars2,multiple=TRUE),
                           sliderInput("hrs2", label = h3("Hour Range"), min = 0, 
                                       max = 23, value = c(0, 23)),
                           checkboxInput("routes2", "Show Most Popular Routes", value = FALSE),

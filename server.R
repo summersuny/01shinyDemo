@@ -180,34 +180,45 @@ function(input, output, session) {
            "cars" = cars)
   })
   
-  
+  df_gvis <- reactive({
   ##GoogleVis
   #medium speed,total hours,distance spent by groups of type & age & gender, per month
   #distance and convert to miles, speed miles/hours. Duration in seconds.
   #age interval
-  df_ck  <-  df %>% mutate(distance=(abs(End.Station.Latitude-Start.Station.Latitude) +abs(End.Station.Longitude-Start.Station.Longitude))*45.096676
+  df2 <- filter(df, start.date >= input$dates2[1] & stop.date <= input$dates2[2] &
+                  hours>=input$hrs2[1]  & hours<=input$hrs2[2] )
+  
+  if(!is.null(input$sex2)) {
+    df2 <- filter(df2,Gender %in% input$sex2)
+  }
+  
+  df_ck  <-  df2 %>% mutate(distance=(abs(End.Station.Latitude-Start.Station.Latitude) +abs(End.Station.Longitude-Start.Station.Longitude))*45.096676
   ) %>% mutate(speed=distance*60*60/Trip.Duration, age=cut(Birth.Year, breaks=seq(1917,2017, by=5), right = TRUE, labels = seq(100,5,by=-5))) 
 
   df_cust <- df_ck %>% 
     group_by(User.Type,age,Gender,months(start.date)) %>% 
     summarise(median_speed=median(speed),
     median_sum_duration=median(sum(Trip.Duration/360)),
-    median_sum_distance=sum(distance)/n(), #avg_trip_distance changed
+    avg_trip_distance=sum(distance)/n(), #avg_trip_distance changed
     count=n())
   
   colnames(df_cust)[4]='month'
+  return(df_cust)
+  })
   output$view <- renderGvis({
-    gvisBubbleChart(df_cust, idvar="age", 
-                              xvar="median_sum_distance", yvar="median_speed",
+    gvisBubbleChart(df_gvis(), idvar="age", 
+                              xvar="avg_trip_distance", yvar="median_speed",
                               colorvar="Gender", sizevar="count",
                               options=list(
                                 vAxis= "{minValue: 0, maxValue: 6,title: 'Speed (MPH)',
+                                gridlines:{color:'transparent'},
                                 viewWindowMode:'explicit',
                                 viewWindow: {
-                                max:6.5,
-                                min:4.5}}",
+                                max:6.25,
+                                min:4.6}}",
                                 hAxis= "{
                                 maxValue:3,title:'Average Miles Per Trip)' ,
+                                gridlines:{color:'transparent'},
                                 viewWindowMode:'explicit',
                                 viewWindow: {
                                 max:2,
@@ -216,9 +227,13 @@ function(input, output, session) {
                                 ,width=800 
                                 ,height=400
                                 ,chartArea="{left:80,top:30,width:'100%',height:'75%'}"
-                                ,legend="top"
+                                
                                 ,title="Rider's Performance by Gender and Age"
                                 ,sizeAxis = '{minValue: 0,  maxSize: 20}'
+                                #,backgroundColor='black'
+                                #,backgroundColor.stroke='white'
+                                
+                                
                                 
                                 
                               )
