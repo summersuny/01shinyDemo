@@ -18,6 +18,7 @@ vars3 <- c(
   "Euclidean" = "distance_eucli"
 )
 
+animationOptions(interval=1200,loop=TRUE)
 
 navbarPage("The NYC Citi Bike App", id="nav", 
                    tabPanel("Interactive map",
@@ -47,7 +48,7 @@ navbarPage("The NYC Citi Bike App", id="nav",
                                   #numericInput("hrfrom", "Hour Range From", 8),
                                   #numericInput("hrto", "Hour Range To", 10),
                                   sliderInput("hrs", label = h3("Hour Range"), min = 0, 
-                                              max = 23, value = c(0, 23)),
+                                              max = 23, value = c(0, 23),animate = TRUE ),
                                   checkboxInput("routes", "Show Most Popular Routes", value = FALSE),
                                   
                                   dateRangeInput("dates", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31'),
@@ -71,11 +72,12 @@ navbarPage("The NYC Citi Bike App", id="nav",
                           includeScript("gomap.js")
                         ),
                       
-                        
+                        br(),
                         fluidRow(
                           htmlOutput("view",height = 400, width = 800)
                         ),
                         
+                        hr(),
                         fluidRow(
                           column(12,plotOutput("barplot", height = 200, width = 800))
                           #column(6,DT::dataTableOutput("table"))#, height = 100, width = "40%"))

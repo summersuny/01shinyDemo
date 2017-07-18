@@ -48,7 +48,7 @@ points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) 
     return(sp_lines)
   }
 }
-temp <- distinct(select(df,Start.Station.ID,Start.Total.Docks,Start.Station.Latitude,Start.Station.Longitude))
+temp <- distinct(select(df,Start.Station.ID,Start.Total.Docks,Start.Station.Latitude,Start.Station.Longitude,Start.Station.Name))
 temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,End.Station.Longitude))
 groupColors <- colorRampPalette(c("red", "#ffa500","green"))
 df$hours <- as.numeric(df$hr)
@@ -85,7 +85,7 @@ function(input, output, session) {
     
     dfmap <- left_join(df_station,temp,by = c("Start.Station.ID"="Start.Station.ID")) %>%
       mutate(abs_change_perc=round(100*(nend-nstart)/nstart,1)) %>%
-      filter(!is.na(Start.Station.Latitude)) %>% filter(abs_change_perc,!is.na(rank)) %>% 
+      filter(!is.na(Start.Station.Latitude) & !is.na(abs_change_perc)) %>% 
       mutate(rank=rank(abs_change_perc)) 
 
     return(dfmap)
@@ -134,7 +134,7 @@ function(input, output, session) {
                #layerId=~withcircle,
                stroke=FALSE, fillOpacity=~(nstart/75+nend/75), color=~pal(rank),
                radius=70, 
-               popup =~paste('<b><font color="Red">', 'Station ID: ', Start.Station.ID, '</font></b><br/>',
+               popup =~paste('<b><font color="Red">', 'Station: ', Start.Station.Name, '</font></b><br/>',
                               'Number of Trip Starts Here: ', nstart, '<br/>',
                               'Number of Trip End Here: ', nend, '<br/>',
                               'Rate of Bike Changes: ', abs_change_perc,' %', '<br/>') 
@@ -202,7 +202,7 @@ function(input, output, session) {
                                 max:6.5,
                                 min:4.6}}",
                                 hAxis= "{
-                                maxValue:3,title:'Average Miles Per Trip)' ,
+                                maxValue:3,title:'Average Miles Per Trip' ,
                                 gridlines:{color:'transparent'},
                                 viewWindowMode:'explicit',
                                 viewWindow: {
@@ -286,7 +286,7 @@ function(input, output, session) {
               panel.border = element_blank(),
               panel.background = element_blank(),
               plot.title=element_text(face="bold")) + labs(title="Trip Volume") +
-        xlab("Hours)") + ylab("Number of Trips")
+        xlab("Hours") + ylab("Number of Trips")
       return(p2)
     })
     
