@@ -1,24 +1,4 @@
 library(shiny)
-
-# fluidPage(
-#   titlePanel(h1("Bike Station")),
-#   sidebarLayout(
-#     sidebarPanel(
-#       dateRangeInput("dates", label = h3("Date range"),start = '2017-03-01', end = '2017-03-31')
-#       ,
-# 
-# 
-#        fluidRow(column(4, verbatimTextOutput("value")))
-# 
-#       # sliderInput("bins", "Number of bins:",
-#       #             min = 1, max = 50, value = 30)
-#     ),
-#     mainPanel(
-#       plotOutput("barPlot")
-#     )
-#   )
-# )
-
 ##########
 # Choices for drop-downs
 vars <- c(
@@ -34,7 +14,7 @@ vars2 <- c(
 )
 
 
-navbarPage("Summer's Shiny", id="nav", 
+navbarPage("The NYC Citi Bike App", id="nav", 
                    tabPanel("Interactive map",
                             div(class="outer",
                                 
@@ -54,7 +34,7 @@ navbarPage("Summer's Shiny", id="nav",
                                   top = 60, left = "auto", right = 20, bottom = "auto",
                                   width = 330, height = "auto",
                                   
-                                  h2("Station Explorer"),
+                                  h3("Station Explorer"),
                                   
                                   selectInput("sex", "Gender", vars,multiple=TRUE),
                                   #selectInput("size", "Size", vars, selected = "nboth"),
@@ -103,7 +83,7 @@ navbarPage("Summer's Shiny", id="nav",
                           top = 60, left = "auto", right = 20, bottom = "auto",
                           width = 330, height = "auto",
                           
-                          h2("Station Explorer"),
+                          h3("Station Explorer"),
                           
                           selectInput("sex2", "Gender", vars2,multiple=TRUE),
                           sliderInput("hrs2", label = h3("Hour Range"), min = 0, 

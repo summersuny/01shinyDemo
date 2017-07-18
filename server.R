@@ -1,28 +1,3 @@
-# function(input, output) {
-#   output$value <- renderText({as.character(input$dates[1])})
-#   
-#   output$barPlot <- renderPlot({
-#     df_hr <- df %>% 
-#     filter(df$start.date>=input$dates[1] & df$start.date<=input$dates[2]) %>% 
-#        group_by(hr,weekday) %>% 
-#        summarise(ntrip=n()) 
-#     print(df_hr)
-#      ggplot(df_hr,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=weekday),stat = "Identity")
-#      
-#     # df_hr2 <- df_hr %>% filter(weekday=='Weekday')
-#     # ggplot(df_hr2,aes(x=hr,y=ntrip)) +geom_bar(aes(fill=ntrip),stat = "Identity") + coord_polar() +scale_colour_brewer()
-#     
-#     
-#     # x <- faithful[, 2]
-#     # bins <- input$bins
-#     # hist(x, breaks = bins,
-#     #      col = 'darkgray',
-#     #      border = 'white')
-#   })
-# }
-
-
-
 #########
 library(shiny)
 library(leaflet)
@@ -131,7 +106,7 @@ function(input, output, session) {
   routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
   
   #take top 0.5% popular routes
-  top_route=head(routes2,n=dim(nroute)[1]*0.005)
+  top_route=head(routes2,n=dim(nroute)[1]*0.01)
   z <- gather(top_route, measure, val, -route_id) %>% group_by(route_id) %>%
     do(data.frame(   lat=c(.[["val"]][.[["measure"]]=="Start.Station.Latitude"],
                            .[["val"]][.[["measure"]]=="End.Station.Latitude"]),
@@ -153,12 +128,11 @@ function(input, output, session) {
     addCircles(~Start.Station.Longitude, ~Start.Station.Latitude,
                #layerId=~withcircle,
                stroke=FALSE, fillOpacity=~(nstart/75+nend/75), color=~groupColors(rank),
-               radius=70,
-               popup =~paste('<b><font color="Red">', 'LINE1', '</font></b><br/>',
-                              'acceptance rate: ', 'LINE2', '<br/>',
-                              'undergrads: ', 'LINE3', '<br/>',
-                              '4 year graduation rate: ', 'LINE4', '<br/>',
-                              'median earnings: ', 'LINE5', '<br/>') 
+               radius=70, 
+               popup =~paste('<b><font color="Red">', 'Station ID: ', Start.Station.ID, '</font></b><br/>',
+                              'Number of Trip Starts Here: ', nstart, '<br/>',
+                              'Number of Trip End Here: ', nend, '<br/>',
+                              'Rate of Bike Changes: ', abs_change_perc, '<br/>') 
                  ) 
   
   
@@ -201,10 +175,14 @@ function(input, output, session) {
     median_sum_duration=median(sum(Trip.Duration/360)),
     avg_trip_distance=sum(distance)/n(), #avg_trip_distance changed
     count=n())
-  
+  df_cust$Gender <-  gsub("1", 'Male',df_cust$Gender) 
+  df_cust$Gender <- gsub("2", 'Female',df_cust$Gender) 
+  df_cust$Gender <- gsub("0", 'Unkown',df_cust$Gender)
   colnames(df_cust)[4]='month'
   return(df_cust)
   })
+  
+  
   output$view <- renderGvis({
     gvisBubbleChart(df_gvis(), idvar="age", 
                               xvar="avg_trip_distance", yvar="median_speed",
@@ -214,7 +192,7 @@ function(input, output, session) {
                                 gridlines:{color:'transparent'},
                                 viewWindowMode:'explicit',
                                 viewWindow: {
-                                max:6.25,
+                                max:6.5,
                                 min:4.6}}",
                                 hAxis= "{
                                 maxValue:3,title:'Average Miles Per Trip)' ,
@@ -227,7 +205,7 @@ function(input, output, session) {
                                 ,width=800 
                                 ,height=400
                                 ,chartArea="{left:80,top:30,width:'100%',height:'75%'}"
-                                
+                                ,legend="bottom"
                                 ,title="Rider's Performance by Gender and Age"
                                 ,sizeAxis = '{minValue: 0,  maxSize: 20}'
                                 #,backgroundColor='black'
@@ -298,7 +276,9 @@ function(input, output, session) {
               panel.grid.major = element_blank(),
               panel.grid.minor = element_blank(),
               panel.border = element_blank(),
-              panel.background = element_blank()) 
+              panel.background = element_blank(),
+              plot.title=element_text(face="bold")) + labs(title="Trip Volume") +
+        xlab("Hours)") + ylab("Number of Trips")
       return(p2)
     })
     
