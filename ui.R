@@ -79,7 +79,8 @@ navbarPage("The NYC Citi Bike App", id="nav",
                         
                         hr(),
                         fluidRow(
-                          column(12,plotOutput("barplot", height = 200, width = 800))
+                          column(6,plotOutput("barplot", height = 200, width = 700)),
+                          column(6,plotOutput("hist", height = 250, width = 500))
                           #column(6,DT::dataTableOutput("table"))#, height = 100, width = "40%"))
                         ),
                         

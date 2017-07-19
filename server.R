@@ -189,7 +189,7 @@ function(input, output, session) {
   return(df_cust)
   })
   
-  
+  observe({
   output$view <- renderGvis({
     gvisBubbleChart(df_gvis(), idvar="age", 
                               xvar="avg_trip_distance", yvar="median_speed",
@@ -222,7 +222,8 @@ function(input, output, session) {
                                 
                                 
                               )
-    )
+      )
+    })
   })
   
   #ggplot
@@ -272,8 +273,10 @@ function(input, output, session) {
               panel.border = element_blank(),
               panel.background = element_blank()) 
       print(p)
-    })
+        })
+  })
     
+    observe({
     output$barplot <- renderPlot({
       #if (nrow(zipsInBounds()) == 0)
       # return(NULL)
@@ -288,16 +291,51 @@ function(input, output, session) {
               plot.title=element_text(face="bold")) + labs(title="Trip Volume") +
         xlab("Hours") + ylab("Number of Trips")
       return(p2)
+      })
     })
+  
     
-    # #table data
-    # output$table <- DT::renderDataTable({
-    #   action <- DT::dataTableAjax(session, bar())
-    #   DT::datatable(bar(), options = list(ajax = list(url = action)), escape = FALSE,height = 200)
-    # })
+      ###table for top 10 station in tab2
+      df_station_hist <- reactive({
+        #aggregated data for stations
+        df2 <- filter(df, start.date >= input$dates2[1] & stop.date <= input$dates2[2] &
+                        hours>=input$hrs2[1]  & hours<=input$hrs2[2] )
+        if(!is.null(input$sex2)) {
+          df2 <- filter(df2,Gender %in% input$sex2)
+        }
+        
+        nstart <- df2 %>%  group_by(Start.Station.ID) %>% summarise(count=n()) %>% arrange(desc(count)) %>% head(n=10) %>% mutate(top='Origination') 
+        nend <- df2 %>%  group_by(End.Station.ID) %>% summarise(count=n()) %>% arrange(desc(count)) %>% head(n=10)  %>% mutate(top='Destination')
+        colnames(nstart)[1]='Station.Id'
+        colnames(nend)[1]='Station.Id'
+        df_station <- as.data.frame(rbind(nstart,nend)) 
+        
+        dfhist <- left_join(df_station,temp,by = c("Station.Id"="Start.Station.ID")) 
+        
+        return(dfhist)
+      })
+
     
-    
-  })
+    observe({
+      #top station plot
+      output$hist <- renderPlot({
+        p3 <- ggplot(df_station_hist(),aes(x=reorder(Start.Station.Name,-count),y=count)) + 
+          geom_bar(aes(fill=top),stat = 'Identity',position="stack") + 
+          
+          theme(strip.text.x = element_text(), 
+                legend.title = element_blank(),
+                strip.background = element_rect(fill = "white", colour = NA),
+                panel.grid.major = element_blank(),
+                panel.grid.minor = element_blank(),
+                panel.border = element_blank(),
+                panel.background = element_blank(),
+                plot.title=element_text(face="bold"), 
+                axis.text.x=element_text(angle = 45, hjust = 1)
+          ) + labs(title="Stations") +
+          xlab("Stations") + ylab("Number of Trips") +scale_y_continuous(labels=comma)
+        return(p3) 
+       })
+    })
 
 }
 
