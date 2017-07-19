@@ -209,7 +209,7 @@ function(input, output, session) {
                                 max:2,
                                 min:0}}",
                                 explorer="{actions:['dragToZoom', 'rightClickToReset']}"
-                                ,width=800 
+                                ,width=1000 
                                 ,height=400
                                 ,chartArea="{left:80,top:30,width:'100%',height:'75%'}"
                                 ,legend="bottom"
@@ -321,7 +321,6 @@ function(input, output, session) {
       output$hist <- renderPlot({
         p3 <- ggplot(df_station_hist(),aes(x=reorder(Start.Station.Name,-count),y=count)) + 
           geom_bar(aes(fill=top),stat = 'Identity',position="stack") + 
-          
           theme(strip.text.x = element_text(), 
                 legend.title = element_blank(),
                 strip.background = element_rect(fill = "white", colour = NA),
@@ -336,7 +335,23 @@ function(input, output, session) {
         return(p3) 
        })
     })
-
+    
+    observe({
+    output$density <- renderPlot({
+      ggplot(data =df_gvis() , aes(median_speed,color=Gender,fill=Gender)) +  
+        geom_density(alpha = 0.1) +
+        theme(strip.text.x = element_text(), 
+              legend.title = element_blank(),
+              strip.background = element_rect(fill = "white", colour = NA),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              panel.border = element_blank(),
+              panel.background = element_blank(),
+              plot.title=element_text(face="bold")
+        ) + labs(title="Density of Speed") +
+        xlab("Speed") + ylab("") 
+     })
+    })
 }
 
 

@@ -74,7 +74,8 @@ navbarPage("The NYC Citi Bike App", id="nav",
                       
                         br(),
                         fluidRow(
-                          htmlOutput("view",height = 400, width = 800)
+                          column(6,htmlOutput("view",height = 400, width = 800)),
+                          column(5,plotOutput("density", height =400, width = 400))
                         ),
                         
                         hr(),
