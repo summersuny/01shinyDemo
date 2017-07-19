@@ -18,7 +18,7 @@ vars3 <- c(
   "Euclidean" = "distance_eucli"
 )
 
-animationOptions(interval=1200,loop=TRUE)
+animationOptions(interval=800,loop=TRUE)
 
 navbarPage("The NYC Citi Bike App", id="nav", 
                    tabPanel("Interactive map",

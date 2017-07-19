@@ -49,7 +49,7 @@ points_to_line <- function(data, long, lat, id_field = NULL, sort_field = NULL) 
   }
 }
 temp <- distinct(select(df,Start.Station.ID,Start.Total.Docks,Start.Station.Latitude,Start.Station.Longitude,Start.Station.Name))
-temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,End.Station.Longitude))
+temp2 <- distinct(select(df,End.Station.ID,End.Total.Docks,End.Station.Latitude,End.Station.Longitude,End.Station.Name))
 groupColors <- colorRampPalette(c("red", "#ffa500","green"))
 df$hours <- as.numeric(df$hr)
 
@@ -109,8 +109,9 @@ function(input, output, session) {
   routes <- left_join(nroute,temp,by = c("Start.Station.ID"="Start.Station.ID")) 
   routes2 <- left_join(routes,temp2,by = c("End.Station.ID"="End.Station.ID")) 
   
-  #take top 0.6% popular routes
-  top_route=head(routes2,n=dim(nroute)[1]*0.006)
+  #take top 0.4% popular routes
+  top_route=head(routes2,n=dim(nroute)[1]*0.004)
+  top_route <- top_route %>%  select(-c(Start.Station.Name,End.Station.Name))
   z <- gather(top_route, measure, val, -route_id) %>% group_by(route_id) %>%
     do(data.frame(   lat=c(.[["val"]][.[["measure"]]=="Start.Station.Latitude"],
                            .[["val"]][.[["measure"]]=="End.Station.Latitude"]),
